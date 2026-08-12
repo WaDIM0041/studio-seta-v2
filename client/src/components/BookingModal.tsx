@@ -4,12 +4,15 @@ import {
   api,
   type BookingResult,
   type DayInfo,
+  type GoogleProfile,
   type ServiceDef,
   type SlotsResponse,
   subscribeCalendarEvents,
 } from '../lib/api';
 import { useEscapeKey, useLockBodyScroll } from '../lib/hooks';
 import { SITE } from '../lib/site';
+import { AvailabilityCalendar } from './AvailabilityCalendar';
+import { GoogleSignIn } from './GoogleSignIn';
 import {
   IconArrowRight,
   IconCalendar,
@@ -64,6 +67,7 @@ export function BookingModal({
   const [email, setEmail] = useState('');
   const [comment, setComment] = useState('');
   const [consent, setConsent] = useState(false);
+  const [googleProfile, setGoogleProfile] = useState<GoogleProfile | null>(null);
 
   const initialServiceRef = useRef(preselectServiceId);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -81,6 +85,7 @@ export function BookingModal({
     setEmail('');
     setComment('');
     setConsent(false);
+    setGoogleProfile(null);
     if (initialServiceRef.current) {
       setServiceId(initialServiceRef.current);
       setStep('datetime');
@@ -176,6 +181,13 @@ export function BookingModal({
   const pickDate = (d: string): void => {
     setDate(d);
   };
+
+  const handleGoogleProfile = useCallback((profile: GoogleProfile) => {
+    setGoogleProfile(profile);
+    setError('');
+    setClientName((prev) => prev.trim() || profile.name);
+    setEmail(profile.email);
+  }, []);
 
   const submit = async (): Promise<void> => {
     if (!serviceId || !date || !time) return;
@@ -280,18 +292,15 @@ export function BookingModal({
           {step === 'datetime' && selectedService && (
             <div className="booking-datetime">
               <div className="booking-datetime__days">
-                <p className="caps booking-label">День</p>
+                <p className="caps booking-label">Ближайшие 14 дней</p>
                 {days.length === 0 && <p className="micro">Загрузка расписания…</p>}
-                {days.map((d) => (
-                  <button
-                    key={d.date}
-                    className={`day-row ${date === d.date ? 'day-row--active' : ''}`}
-                    onClick={() => pickDate(d.date)}
-                  >
-                    <span className="day-row__label">{d.label}</span>
-                    <span className={`day-row__status ${d.free ? 'day-row__status--free' : ''}`} />
-                  </button>
-                ))}
+                {days.length > 0 && (
+                  <AvailabilityCalendar
+                    days={days}
+                    selectedDate={date}
+                    onSelect={pickDate}
+                  />
+                )}
               </div>
 
               <div className="booking-datetime__slots">
@@ -319,6 +328,18 @@ export function BookingModal({
                       ))}
                     </div>
                     <p className="micro">Слоты исчезают мгновенно при изменении календаря мастера.</p>
+                  </div>
+                )}
+
+                {slots?.closed && (
+                  <div className="booking-closed">
+                    <span className="caps">Мастер не работает</span>
+                    <p className="micro">
+                      {slots.closedReason === 'weekend'
+                        ? 'Это выходной день студии.'
+                        : 'У мастера персональный выходной.'}{' '}
+                      Выберите другую дату.
+                    </p>
                   </div>
                 )}
 
@@ -365,6 +386,46 @@ export function BookingModal({
                 <span className="booking-form__price">{selectedService.price.toLocaleString('ru-RU')} ₽</span>
               </div>
 
+              {!googleProfile ? (
+                <>
+                  <div className="booking-form__divider">
+                    <span className="booking-form__divider-line" />
+                    <span className="caps">Войти через Google</span>
+                    <span className="booking-form__divider-line" />
+                  </div>
+                  <GoogleSignIn onProfile={handleGoogleProfile} onError={setError} />
+                  <div className="booking-form__divider">
+                    <span className="booking-form__divider-line" />
+                    <span className="caps">Или заполнить вручную</span>
+                    <span className="booking-form__divider-line" />
+                  </div>
+                </>
+              ) : (
+                <div className="booking-google-ok">
+                  {googleProfile.picture && (
+                    <img
+                      className="booking-google-ok__avatar"
+                      src={googleProfile.picture}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                  <div className="booking-google-ok__meta">
+                    <span className="booking-google-ok__name">
+                      {googleProfile.name || googleProfile.email}
+                    </span>
+                    <span className="micro">{googleProfile.email}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="booking-google-ok__switch"
+                    onClick={() => setGoogleProfile(null)}
+                  >
+                    сменить аккаунт
+                  </button>
+                </div>
+              )}
+
               <label className="field">
                 <span className="field__label">Имя</span>
                 <input
@@ -389,7 +450,12 @@ export function BookingModal({
               </label>
 
               <label className="field">
-                <span className="field__label">Email <em className="field__opt">необязательно</em></span>
+                <span className="field__label">
+                  Email{' '}
+                  <em className="field__opt">
+                    {googleProfile ? 'из Google-аккаунта' : 'необязательно'}
+                  </em>
+                </span>
                 <input
                   className="field__input"
                   value={email}
@@ -397,7 +463,14 @@ export function BookingModal({
                   placeholder="для подтверждения записи"
                   type="email"
                   autoComplete="email"
+                  readOnly={Boolean(googleProfile)}
                 />
+                {googleProfile && (
+                  <p className="micro booking-google-hint">
+                    Приглашение от Google придёт на этот адрес — запись появится в
+                    вашем личном календаре.
+                  </p>
+                )}
               </label>
 
               <label className="field">
