@@ -8,6 +8,7 @@ import { Portfolio } from '../components/Portfolio';
 import { Reviews } from '../components/Reviews';
 import { BookingCta } from '../components/BookingCta';
 import { ContactBar } from '../components/ContactBar';
+import { LocationMap } from '../components/LocationMap';
 import { Footer } from '../components/Footer';
 import { CookieBanner } from '../components/CookieBanner';
 import { SearchOverlay } from '../components/SearchOverlay';
@@ -35,6 +36,7 @@ export function Home() {
         <Portfolio />
         <Reviews />
         <BookingCta />
+        <LocationMap />
         <ContactBar />
       </main>
       <Footer />

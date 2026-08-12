@@ -20,6 +20,9 @@ export interface DayInfo {
   label: string;
   slotsCount: number;
   free: boolean;
+  closed: boolean;
+  closedReason?: 'weekend' | 'date' | null;
+  fill: number;
 }
 
 export interface SlotsResponse {
@@ -31,6 +34,9 @@ export interface SlotsResponse {
     price: number;
   };
   workHours: { start: number; end: number; tz: string };
+  closed?: boolean;
+  closedReason?: 'weekend' | 'date' | null;
+  fill?: number;
   busy: Array<{ start: string; end: string }>;
   slots: SlotInfo[];
 }
@@ -64,6 +70,14 @@ export class ApiError extends Error {
     super(message);
     this.status = status;
   }
+}
+
+export interface GoogleProfile {
+  sub: string;
+  email: string;
+  name: string;
+  picture: string;
+  emailVerified: boolean;
 }
 
 const isGitHubPages = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
@@ -117,6 +131,44 @@ function getSeededBusy(dateStr: string): Array<{ start: string; end: string }> {
   return busy;
 }
 
+const MOCK_CLOSED_OFFSETS = [4, 9];
+
+function isMockClosed(dateStr: string): { closed: boolean; reason: 'weekend' | 'date' | null } {
+  const d = new Date(`${dateStr}T12:00:00`);
+  if (d.getDay() === 0) return { closed: true, reason: 'weekend' };
+  const base = new Date(`${new Date().toISOString().slice(0, 10)}T12:00:00`);
+  const diff = Math.round((d.getTime() - base.getTime()) / 86_400_000);
+  if (MOCK_CLOSED_OFFSETS.includes(diff)) return { closed: true, reason: 'date' };
+  return { closed: false, reason: null };
+}
+
+function mockFill(dateStr: string, busyIntervals: Array<{ start: string; end: string }>): number {
+  const startMin = 10 * 60;
+  const endMin = 20 * 60;
+  const windowMs = (endMin - startMin) * 60_000;
+  if (windowMs <= 0) return 0;
+  const dayStart = new Date(`${dateStr}T00:00:00`).getTime();
+  const ranges = busyIntervals
+    .map((b) => ({
+      start: Math.max(new Date(b.start).getTime(), dayStart + startMin * 60_000),
+      end: Math.min(new Date(b.end).getTime(), dayStart + endMin * 60_000),
+    }))
+    .filter((r) => r.end > r.start)
+    .sort((a, b) => a.start - b.start);
+  let busyMs = 0;
+  let cursor = 0;
+  for (const r of ranges) {
+    if (r.start > cursor) {
+      busyMs += r.end - r.start;
+      cursor = r.end;
+    } else if (r.end > cursor) {
+      busyMs += r.end - cursor;
+      cursor = r.end;
+    }
+  }
+  return Math.min(1, busyMs / windowMs);
+}
+
 function mockSlots(dateStr: string, serviceId: string): SlotsResponse {
   const service = SERVICES.find(s => s.id === serviceId) || SERVICES[0];
   const duration = service.durationMin;
@@ -134,41 +186,46 @@ function mockSlots(dateStr: string, serviceId: string): SlotsResponse {
     }
   }
 
+  const { closed, reason } = isMockClosed(dateStr);
+  const fill = mockFill(dateStr, busyIntervals);
   const slots: SlotInfo[] = [];
-  let currentMin = startHour * 60;
-  const maxMin = endHour * 60;
 
-  while (currentMin + duration <= maxMin) {
-    const hh = String(Math.floor(currentMin / 60)).padStart(2, '0');
-    const mm = String(currentMin % 60).padStart(2, '0');
-    const timeStr = `${hh}:${mm}`;
+  if (!closed) {
+    let currentMin = startHour * 60;
+    const maxMin = endHour * 60;
 
-    const endTotal = currentMin + duration;
-    const ehh = String(Math.floor(endTotal / 60)).padStart(2, '0');
-    const emm = String(endTotal % 60).padStart(2, '0');
-    const endTimeStr = `${ehh}:${emm}`;
+    while (currentMin + duration <= maxMin) {
+      const hh = String(Math.floor(currentMin / 60)).padStart(2, '0');
+      const mm = String(currentMin % 60).padStart(2, '0');
+      const timeStr = `${hh}:${mm}`;
 
-    const slotStartMs = new Date(`${dateStr}T${timeStr}:00`).getTime();
-    const slotEndMs = new Date(`${dateStr}T${endTimeStr}:00`).getTime();
+      const endTotal = currentMin + duration;
+      const ehh = String(Math.floor(endTotal / 60)).padStart(2, '0');
+      const emm = String(endTotal % 60).padStart(2, '0');
+      const endTimeStr = `${ehh}:${emm}`;
 
-    let isOverlap = false;
-    for (const b of busyIntervals) {
-      const bStartMs = new Date(b.start).getTime();
-      const bEndMs = new Date(b.end).getTime();
-      if (slotStartMs < bEndMs && slotEndMs > bStartMs) {
-        isOverlap = true;
-        break;
+      const slotStartMs = new Date(`${dateStr}T${timeStr}:00`).getTime();
+      const slotEndMs = new Date(`${dateStr}T${endTimeStr}:00`).getTime();
+
+      let isOverlap = false;
+      for (const b of busyIntervals) {
+        const bStartMs = new Date(b.start).getTime();
+        const bEndMs = new Date(b.end).getTime();
+        if (slotStartMs < bEndMs && slotEndMs > bStartMs) {
+          isOverlap = true;
+          break;
+        }
       }
-    }
 
-    if (!isOverlap) {
-      slots.push({
-        time: timeStr,
-        end: endTimeStr,
-        iso: `${dateStr}T${timeStr}:00.000Z`
-      });
+      if (!isOverlap) {
+        slots.push({
+          time: timeStr,
+          end: endTimeStr,
+          iso: `${dateStr}T${timeStr}:00.000Z`
+        });
+      }
+      currentMin += 30;
     }
-    currentMin += 30;
   }
 
   return {
@@ -180,6 +237,9 @@ function mockSlots(dateStr: string, serviceId: string): SlotsResponse {
       price: service.price
     },
     workHours: { start: startHour, end: endHour, tz: 'Europe/Moscow' },
+    closed,
+    closedReason: reason,
+    fill,
     busy: busyIntervals.map(b => ({
       start: b.start.split('T')[1].slice(0, 5),
       end: b.end.split('T')[1].slice(0, 5)
@@ -201,7 +261,10 @@ function mockWeek(serviceId: string, fromStr: string): { serviceId: string; days
       weekday: cur.getDay(),
       label: cur.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' }),
       slotsCount: response.slots.length,
-      free: response.slots.length > 0
+      free: response.slots.length > 0,
+      closed: response.closed ?? false,
+      closedReason: response.closedReason ?? null,
+      fill: response.fill ?? 0,
     });
   }
   return { serviceId, days };
@@ -286,6 +349,17 @@ export const api = {
   calendarStatus: () => {
     if (isGitHubPages) return Promise.resolve({ kind: 'demo', label: 'GitHub Pages (Встроенная симуляция)', configured: true, authorized: true });
     return request<{ kind: string; label: string; configured: boolean; authorized: boolean }>('/api/oauth/status');
+  },
+  authConfig: () => {
+    if (isGitHubPages) return Promise.resolve({ googleSignIn: false, clientId: null });
+    return request<{ googleSignIn: boolean; clientId: string | null }>('/api/auth/config');
+  },
+  googleSignIn: (credential: string) => {
+    if (isGitHubPages) throw new ApiError('Google Sign-In недоступен в этом режиме');
+    return request<GoogleProfile>('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ credential }),
+    });
   },
   health: () => {
     if (isGitHubPages) return Promise.resolve({ ok: true });

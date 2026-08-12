@@ -32,15 +32,15 @@
   .about__grid {
     grid-template-columns: 1fr;
   }
-  .booking-datetime {
-    grid-template-columns: 1fr;
+  .cal-day {
+    min-height: 104px;
+    padding: var(--sp-2);
   }
-  .booking-datetime__days {
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-    padding-right: 0;
-    padding-bottom: var(--sp-4);
-    max-height: 220px;
+  .cal-day__num {
+    font-size: 24px;
+  }
+  .location__grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -96,6 +96,16 @@
   }
   .booking-slot-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .cal-day {
+    min-height: 92px;
+  }
+  .cal__row,
+  .cal__weekdays {
+    gap: 6px;
+  }
+  .cal__legend {
+    gap: var(--sp-2) var(--sp-3);
   }
   .modal__panel {
     width: 100%;
