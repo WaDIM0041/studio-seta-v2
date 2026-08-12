@@ -1,3 +1,5 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import express from 'express';
 import { DateTime } from 'luxon';
@@ -34,6 +36,18 @@ app.use('/api/demo', demoRouter);
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Не найдено' });
+});
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDistPath = path.join(__dirname, '../../client/dist');
+
+// Serve static assets from client dist
+app.use(express.static(clientDistPath));
+
+// Fallback all other routes to index.html for React router support (SPA)
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
 const provider = buildProvider();
