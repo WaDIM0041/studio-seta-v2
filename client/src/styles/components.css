@@ -310,3 +310,122 @@
   border-bottom: 1px solid rgba(212, 175, 55, 0.4);
   padding-bottom: 2px;
 }
+
+/* ============================================================
+   AK Developer Logo (Anna Kamchatka)
+   ============================================================ */
+.footer__creator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.ak-logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none !important;
+  color: inherit;
+  font-family: var(--sans);
+  vertical-align: middle;
+  transition: opacity var(--dur-s) var(--ease-out);
+}
+
+.ak-logo-link:hover {
+  opacity: 0.85;
+}
+
+.ak-logo-hex-wrapper {
+  position: relative;
+  width: 32px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ak-logo-hex-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Outer Hexagon with gradient border */
+.ak-hex-outer {
+  stroke: url(#ak-hex-gradient);
+  stroke-width: 1.5;
+  fill: rgba(10, 10, 12, 0.7);
+  transition: filter var(--dur-s) var(--ease-out);
+}
+
+.ak-logo-link:hover .ak-hex-outer {
+  filter: drop-shadow(0 0 3px rgba(13, 242, 183, 0.4));
+}
+
+/* Middle Hexagon (thin green/teal, semi-transparent) */
+.ak-hex-middle {
+  stroke: #0df2b7;
+  stroke-width: 0.5;
+  stroke-opacity: 0.25;
+  fill: none;
+}
+
+/* Inner Hexagon (thin purple, semi-transparent) */
+.ak-hex-inner {
+  stroke: #7c3aed;
+  stroke-width: 0.5;
+  stroke-opacity: 0.2;
+  fill: none;
+}
+
+/* Centered text "AK" */
+.ak-hex-text {
+  fill: #0df2b7;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-family: var(--sans);
+  transition: fill var(--dur-s) var(--ease-out), text-shadow var(--dur-s) var(--ease-out);
+}
+
+.ak-logo-link:hover .ak-hex-text {
+  fill: #00ffff;
+  text-shadow: 0 0 4px rgba(13, 242, 183, 0.7);
+}
+
+/* Text Container on the right */
+.ak-logo-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
+/* Brand Name: ANNA KAMCHATKA */
+.ak-logo-brand-name {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  color: #cfcfd2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color var(--dur-s) var(--ease-out);
+}
+
+.ak-logo-link:hover .ak-logo-brand-name {
+  color: #ffffff;
+}
+
+/* Domain Link: annakam.ru */
+.ak-logo-domain {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-top: 1px;
+  text-decoration: underline;
+  transition: color var(--dur-s) var(--ease-out);
+}
+
+.ak-logo-link:hover .ak-logo-domain {
+  color: #0df2b7;
+}
+

@@ -112,18 +112,49 @@ export function Footer() {
           <div className="footer__legal-row">
             <span>© {new Date().getFullYear()} STUDIO SETA by Catherine · {SITE.domain}</span>
             <span>Сайт не является публичной офертой</span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <span className="footer__creator">
               Создание сайта: 
-              <a href="https://annakam.ru" target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: 'var(--gold-soft)' }}>
-                <svg viewBox="0 0 30 30" width="15" height="15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block' }}>
-                  <path fill="#1a1a1c" stroke="#d4af37" strokeWidth="0.63" d="M24.51,28.51H5.49c-2.21,0-4-1.79-4-4V5.49c0-2.21,1.79-4,4-4h19.03c2.21,0,4,1.79,4,4v19.03C28.51,26.72,26.72,28.51,24.51,28.51z"/>
-                  <g style={{ fill: 'var(--gold-soft)' }}>
-                    <path fill="currentColor" d="M15.47,7.1l-1.3,1.85c-0.2,0.29-0.54,0.47-0.9,0.47h-7.1V7.09C6.16,7.1,15.47,7.1,15.47,7.1z"/>
-                    <polygon fill="currentColor" points="24.3,7.1 13.14,22.91 5.7,22.91 16.86,7.1"/>
-                    <path fill="currentColor" d="M14.53,22.91l1.31-1.86c0.2-0.29,0.54-0.47,0.9-0.47h7.09v2.33H14.53z"/>
-                  </g>
-                </svg>
-                <span style={{ textDecoration: 'underline' }}>AK annakam.ru</span>
+              <a 
+                href="https://annakam.ru" 
+                target="_blank" 
+                rel="noreferrer" 
+                className="ak-logo-link"
+              >
+                <span className="ak-logo-hex-wrapper">
+                  <svg viewBox="0 0 40 44" className="ak-logo-hex-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="ak-hex-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#0df2b7" />
+                        <stop offset="50%" stopColor="#0ba6ff" />
+                        <stop offset="100%" stopColor="#7c3aed" />
+                      </linearGradient>
+                    </defs>
+                    <polygon 
+                      points="20,2 38,12 38,32 20,42 2,32 2,12" 
+                      className="ak-hex-outer"
+                    />
+                    <polygon 
+                      points="20,6 34.5,14.5 34.5,29.5 20,38 5.5,29.5 5.5,14.5" 
+                      className="ak-hex-middle"
+                    />
+                    <polygon 
+                      points="20,10 31,16.5 31,27.5 20,34 9,27.5 9,16.5" 
+                      className="ak-hex-inner"
+                    />
+                    <text 
+                      x="20" 
+                      y="25.5" 
+                      textAnchor="middle" 
+                      className="ak-hex-text"
+                    >
+                      AK
+                    </text>
+                  </svg>
+                </span>
+                <span className="ak-logo-text-wrapper">
+                  <span className="ak-logo-brand-name">ANNA KAMCHATKA</span>
+                  <span className="ak-logo-domain">annakam.ru</span>
+                </span>
               </a>
             </span>
             <span>Возрастная маркировка {SITE.age}</span>
