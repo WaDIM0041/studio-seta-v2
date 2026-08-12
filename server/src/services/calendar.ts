@@ -13,6 +13,11 @@ export interface CalendarEvent {
   description: string;
   start: Date;
   end: Date;
+  /**
+   * Client email. When set, the client is added as an attendee and Google
+   * sends them an invitation so the event shows up in their personal calendar.
+   */
+  attendeeEmail?: string;
 }
 
 export interface CalendarProvider {
@@ -33,6 +38,32 @@ const SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/calendar.readonly',
 ];
+
+export interface EventInsertParams {
+  calendarId: string;
+  requestBody: calendar_v3.Schema$Event;
+  sendUpdates?: 'all';
+}
+
+/**
+ * Builds the parameters for `calendar.events.insert`. Pure function — when an
+ * attendee email is present the client is invited (Google mails them), so the
+ * booking appears in the client's personal Google Calendar too.
+ */
+export function buildEventInsertParams(event: CalendarEvent): EventInsertParams {
+  const hasAttendee = Boolean(event.attendeeEmail);
+  return {
+    calendarId: env.google.calendarId,
+    requestBody: {
+      summary: event.summary,
+      description: event.description,
+      start: { dateTime: event.start.toISOString() },
+      end: { dateTime: event.end.toISOString() },
+      ...(hasAttendee ? { attendees: [{ email: event.attendeeEmail }] } : {}),
+    },
+    ...(hasAttendee ? { sendUpdates: 'all' as const } : {}),
+  };
+}
 
 function redirectUri(): string {
   return env.google.redirectUri || `${env.publicBaseUrl}/api/oauth/callback`;
@@ -126,15 +157,7 @@ class GoogleCalendarProvider implements CalendarProvider {
   }
 
   async createEvent(event: CalendarEvent): Promise<void> {
-    await this.calendar().events.insert({
-      calendarId: env.google.calendarId,
-      requestBody: {
-        summary: event.summary,
-        description: event.description,
-        start: { dateTime: event.start.toISOString() },
-        end: { dateTime: event.end.toISOString() },
-      },
-    });
+    await this.calendar().events.insert(buildEventInsertParams(event));
   }
 
   async startWatch(): Promise<string> {
@@ -237,15 +260,7 @@ class ServiceAccountProvider implements CalendarProvider {
   }
 
   async createEvent(event: CalendarEvent): Promise<void> {
-    await this.calendar().events.insert({
-      calendarId: env.google.calendarId,
-      requestBody: {
-        summary: event.summary,
-        description: event.description,
-        start: { dateTime: event.start.toISOString() },
-        end: { dateTime: event.end.toISOString() },
-      },
-    });
+    await this.calendar().events.insert(buildEventInsertParams(event));
   }
 
   async startWatch(): Promise<string> {

@@ -59,6 +59,32 @@ function fmt(startIso: string): string {
     .toFormat('cccc, d MMMM, HH:mm');
 }
 
+export interface TelegramBookingDetails {
+  clientName: string;
+  phone: string;
+  serviceName: string;
+  startIso: string;
+}
+
+/** Instant notification to the owner with the booking details. */
+export function buildOwnerTelegramText(d: TelegramBookingDetails): string {
+  return [
+    'Новая запись на сайте',
+    `${d.clientName} — ${d.serviceName}`,
+    fmt(d.startIso),
+    `Тел: ${d.phone}`,
+  ].join('\n');
+}
+
+/** Short confirmation sent to the client when they didn't provide an email. */
+export function buildClientTelegramText(d: TelegramBookingDetails): string {
+  return [
+    'Запись подтверждена',
+    `${d.clientName}, вы записаны: ${d.serviceName}`,
+    fmt(d.startIso),
+  ].join('\n');
+}
+
 function shellHtml(inner: string): string {
   return `
   <div style="font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#0b0b0c;padding:32px 16px;">
