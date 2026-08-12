@@ -2,7 +2,13 @@ import { Router } from 'express';
 import { DateTime } from 'luxon';
 import { env } from '../config/env.js';
 import { calendar } from '../services/calendar.js';
-import { computeFreeSlots, dayWindow, getServiceDef } from '../services/slots.js';
+import {
+  computeFreeSlots,
+  dayFill,
+  dayWindow,
+  getServiceDef,
+  isDateClosed,
+} from '../services/slots.js';
 
 export const slotsRouter = Router();
 
@@ -15,6 +21,8 @@ slotsRouter.get('/', async (req, res) => {
   const { start: ws, end: we } = dayWindow(date);
   const busy = await calendar.getBusy(ws.toJSDate(), we.toJSDate());
   const { slots, busyRanges } = computeFreeSlots(date, busy, service.id);
+  const { closed, reason } = isDateClosed(date);
+  const fill = dayFill(date, busy);
 
   return res.json({
     date,
@@ -29,8 +37,11 @@ slotsRouter.get('/', async (req, res) => {
       end: env.workHours.end,
       tz: env.timezone,
     },
+    closed,
+    closedReason: reason,
+    fill,
     busy: busyRanges.map((r) => ({ start: r.start.toISO(), end: r.end.toISO() })),
-    slots,
+    slots: closed ? [] : slots,
   });
 });
 
@@ -45,12 +56,17 @@ slotsRouter.get('/week', async (req, res) => {
     const { start: ws, end: we } = dayWindow(dateStr);
     const busy = await calendar.getBusy(ws.toJSDate(), we.toJSDate());
     const { slots } = computeFreeSlots(dateStr, busy, service.id);
+    const { closed, reason } = isDateClosed(dateStr);
+    const fill = dayFill(dateStr, busy);
     days.push({
       date: dateStr,
       weekday: day.weekday,
       label: day.setLocale('ru').toFormat('ccc, d MMM'),
-      slotsCount: slots.length,
-      free: slots.length > 0,
+      slotsCount: closed ? 0 : slots.length,
+      free: !closed && slots.length > 0,
+      closed,
+      closedReason: reason,
+      fill,
     });
   }
   return res.json({ serviceId: service.id, days });

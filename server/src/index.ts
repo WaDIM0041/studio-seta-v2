@@ -8,6 +8,7 @@ import { storage } from './lib/storage.js';
 import { sseConnect } from './lib/sse.js';
 import { buildProvider } from './services/calendar.js';
 import { startReminderLoop } from './services/reminders.js';
+import { authRouter } from './routes/auth.js';
 import { bookingRouter } from './routes/booking.js';
 import { demoRouter } from './routes/demo.js';
 import { oauthRouter } from './routes/oauth.js';
@@ -26,6 +27,7 @@ app.get('/api/health', (_req, res) => {
 
 app.get('/api/events/stream', sseConnect);
 
+app.use('/api/auth', authRouter);
 app.use('/api/services', servicesRouter);
 app.use('/api/slots', slotsRouter);
 app.use('/api/booking', bookingRouter);
@@ -68,6 +70,14 @@ void (async () => {
       }));
       storage.setDemoBusy(seeded);
       console.log('[demo] засеяны занятые слоты для демонстрации занятости');
+    }
+    if (storage.getClosedDates().length === 0) {
+      const base = DateTime.now().setZone(env.timezone).startOf('day');
+      const closed = [base.plus({ days: 4 }).toISODate(), base.plus({ days: 9 }).toISODate()].filter(
+        (d): d is string => Boolean(d),
+      );
+      storage.setClosedDates(closed);
+      console.log('[demo] засеяны дни, когда мастер не работает');
     }
   }
   startReminderLoop();

@@ -1,10 +1,63 @@
 import { DateTime } from 'luxon';
 import { env } from '../config/env.js';
 import { getService, type ServiceDef } from '../data/services.js';
-import type { BusyInterval } from './calendar.js';
+import { storage } from '../lib/storage.js';
+import { calendar, type BusyInterval } from './calendar.js';
 
 export function getServiceDef(id: string): ServiceDef {
   return getService(id);
+}
+
+export interface DayClosed {
+  closed: boolean;
+  reason: 'weekend' | 'date' | null;
+}
+
+/**
+ * Checks whether the studio is closed on the given date.
+ * Either because it's outside the configured work week ("weekend")
+ * or the master has a personal day off on that exact date ("date").
+ */
+export function isDateClosed(dateStr: string): DayClosed {
+  const day = DateTime.fromISO(dateStr);
+  if (!env.workDays.includes(day.weekday)) return { closed: true, reason: 'weekend' };
+  if (env.closedDates.includes(dateStr)) return { closed: true, reason: 'date' };
+  if (calendar.kind === 'demo' && storage.getClosedDates().includes(dateStr)) {
+    return { closed: true, reason: 'date' };
+  }
+  return { closed: false, reason: null };
+}
+
+/**
+ * How much of the working day is already occupied by calendar events
+ * (busy minutes / work window minutes), in 0..1. Overlapping events
+ * are counted once. Used to fill the date cell in the availability grid.
+ */
+export function dayFill(dateStr: string, busy: BusyInterval[]): number {
+  const { start: ws, end: we } = dayWindow(dateStr);
+  const windowMs = we.toMillis() - ws.toMillis();
+  if (windowMs <= 0) return 0;
+
+  const ranges = busy
+    .map((b) => ({
+      start: Math.max(DateTime.fromJSDate(b.start).setZone(env.timezone).toMillis(), ws.toMillis()),
+      end: Math.min(DateTime.fromJSDate(b.end).setZone(env.timezone).toMillis(), we.toMillis()),
+    }))
+    .filter((r) => r.end > r.start)
+    .sort((a, b) => a.start - b.start);
+
+  let busyMs = 0;
+  let cursor = 0;
+  for (const r of ranges) {
+    if (r.start > cursor) {
+      busyMs += r.end - r.start;
+      cursor = r.end;
+    } else if (r.end > cursor) {
+      busyMs += r.end - cursor;
+      cursor = r.end;
+    }
+  }
+  return Math.min(1, busyMs / windowMs);
 }
 
 export function dayWindow(dateStr: string): { start: DateTime; end: DateTime } {

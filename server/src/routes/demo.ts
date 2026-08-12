@@ -42,23 +42,52 @@ demoRouter.post('/busy', (req, res) => {
 });
 
 demoRouter.post('/busy/seed', (_req, res) => {
-  if (storage.getDemoBusy().length > 0) {
-    return res.json({ ok: true, busy: storage.getDemoBusy() });
+  if (storage.getDemoBusy().length === 0) {
+    const base = DateTime.now().setZone(env.timezone).startOf('day');
+    const items = [
+      { offsetDays: 0, start: 12, end: 13 },
+      { offsetDays: 0, start: 16, end: 16.5 },
+      { offsetDays: 1, start: 11, end: 12.5 },
+      { offsetDays: 1, start: 17, end: 18 },
+      { offsetDays: 2, start: 13.5, end: 15 },
+    ].map((o) => ({
+      start: base.plus({ days: o.offsetDays, hours: o.start }).toISO() ?? '',
+      end: base.plus({ days: o.offsetDays, hours: o.end }).toISO() ?? '',
+      label: 'Событие мастера (демо)',
+    }));
+    storage.setDemoBusy(items);
+    calendar.invalidateCache();
+    sseBroadcast('calendar-change', { state: 'demo-seeded', at: new Date().toISOString() });
   }
-  const base = DateTime.now().setZone(env.timezone).startOf('day');
-  const items = [
-    { offsetDays: 0, start: 12, end: 13 },
-    { offsetDays: 0, start: 16, end: 16.5 },
-    { offsetDays: 1, start: 11, end: 12.5 },
-    { offsetDays: 1, start: 17, end: 18 },
-    { offsetDays: 2, start: 13.5, end: 15 },
-  ].map((o) => ({
-    start: base.plus({ days: o.offsetDays, hours: o.start }).toISO() ?? '',
-    end: base.plus({ days: o.offsetDays, hours: o.end }).toISO() ?? '',
-    label: 'Событие мастера (демо)',
-  }));
-  storage.setDemoBusy(items);
+  return res.json({ ok: true, busy: storage.getDemoBusy() });
+});
+
+demoRouter.get('/closed', (_req, res) => {
+  res.json({ closed: storage.getClosedDates() });
+});
+
+demoRouter.post('/closed', (req, res) => {
+  const { date } = (req.body || {}) as { date?: unknown };
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return res.status(400).json({ error: 'Укажите дату в формате YYYY-MM-DD' });
+  }
+  const items = storage.getClosedDates();
+  if (!items.includes(date)) items.push(date);
+  storage.setClosedDates(items);
   calendar.invalidateCache();
-  sseBroadcast('calendar-change', { state: 'demo-seeded', at: new Date().toISOString() });
-  return res.json({ ok: true, busy: items });
+  sseBroadcast('calendar-change', { state: 'demo-closed', at: new Date().toISOString() });
+  return res.status(201).json({ ok: true, closed: items });
+});
+
+demoRouter.post('/closed/seed', (_req, res) => {
+  if (storage.getClosedDates().length === 0) {
+    const base = DateTime.now().setZone(env.timezone).startOf('day');
+    const dates = [base.plus({ days: 4 }).toISODate(), base.plus({ days: 9 }).toISODate()].filter(
+      (d): d is string => Boolean(d),
+    );
+    storage.setClosedDates(dates);
+    calendar.invalidateCache();
+    sseBroadcast('calendar-change', { state: 'demo-closed-seeded', at: new Date().toISOString() });
+  }
+  return res.json({ ok: true, closed: storage.getClosedDates() });
 });

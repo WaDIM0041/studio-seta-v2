@@ -92,4 +92,10 @@ export const storage = {
   setDemoBusy(items: DemoBusy[]): void {
     write('demo-busy.json', items);
   },
+  getClosedDates(): string[] {
+    return read('closed-dates.json', []);
+  },
+  setClosedDates(items: string[]): void {
+    write('closed-dates.json', items);
+  },
 };

@@ -16,6 +16,14 @@ export const env = {
     end: num(process.env.WORK_END_HOUR, 20),
   },
   slotGranularityMin: num(process.env.SLOT_GRANULARITY_MIN, 30),
+  workDays: (process.env.WORK_DAYS || '1,2,3,4,5,6')
+    .split(',')
+    .map((s) => Number(s.trim()))
+    .filter((n) => Number.isInteger(n) && n >= 1 && n <= 7),
+  closedDates: (process.env.CLOSED_DATES || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => /^\d{4}-\d{2}-\d{2}$/.test(s)),
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID || '',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
