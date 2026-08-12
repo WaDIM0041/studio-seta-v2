@@ -33,6 +33,26 @@ curl http://localhost:3001/api/oauth/url
 
 8. Проверьте: `curl http://localhost:3001/api/oauth/status` → `authorized: true`.
 
+## Вход клиентов через Google («Войти через Google»)
+
+Чтобы клиент авторизовался своим Google-аккаунтом (тем, что уже вошёл на его
+телефоне/в браузере) и запись автоматически попала в его личный календарь:
+
+1. В том же OAuth-клиенте (тип **Web application**) добавьте в
+   **Authorized JavaScript origins** все публичные origin'ы сайта, например
+   `https://studio-seta.ru`, `https://5173-<id>.monkeycode-ai.live`
+   и `http://localhost:5173` для разработки.
+2. В `server/.env` уже должен быть `GOOGLE_CLIENT_ID` (тот же, что для календаря).
+3. На фронтенде в шаге «Данные» формы записи появится кнопка «Войти через Google»
+   (Google Identity Services). `id_token` уходит на `POST /api/auth/google`,
+   сервер проверяет его подпись и audience через `OAuth2Client.verifyIdToken`.
+4. Имя и email клиента подставляются в форму; email фиксируется, и при
+   подтверждении записи клиент добавляется **attendee** события
+   (`sendUpdates: 'all'`) — Google присылает ему приглашение, и запись
+   появляется в его личном Google Calendar.
+
+Без `GOOGLE_CLIENT_ID` кнопка на сайте не показывается (демо-режим).
+
 ## Способ 2. Service Account (общий календарь)
 
 1. **Credentials → Create credentials → Service account**.
