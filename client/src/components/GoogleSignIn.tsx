@@ -18,6 +18,7 @@ declare global {
 export interface GoogleSignInProps {
   onProfile: (profile: GoogleProfile) => void;
   onError?: (message: string) => void;
+  onAvailable?: (available: boolean) => void;
 }
 
 /**
@@ -27,15 +28,15 @@ export interface GoogleSignInProps {
  * onProfile so the booking form can be prefilled and the client's Google email
  * used for the calendar invite.
  */
-export function GoogleSignIn({ onProfile, onError }: GoogleSignInProps) {
+export function GoogleSignIn({ onProfile, onError, onAvailable }: GoogleSignInProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [clientId, setClientId] = useState<string | null>(null);
   const [scriptReady, setScriptReady] = useState(false);
-  const callbacksRef = useRef({ onProfile, onError });
+  const callbacksRef = useRef({ onProfile, onError, onAvailable });
 
   useEffect(() => {
-    callbacksRef.current = { onProfile, onError };
-  }, [onProfile, onError]);
+    callbacksRef.current = { onProfile, onError, onAvailable };
+  }, [onProfile, onError, onAvailable]);
 
   // Feature-detect: the button is only shown when GOOGLE_CLIENT_ID is set.
   useEffect(() => {
@@ -45,9 +46,12 @@ export function GoogleSignIn({ onProfile, onError }: GoogleSignInProps) {
       .then((cfg) => {
         if (cancelled) return;
         setClientId(cfg.googleSignIn ? cfg.clientId : null);
+        callbacksRef.current.onAvailable?.(cfg.googleSignIn);
       })
       .catch(() => {
-        if (!cancelled) setClientId(null);
+        if (cancelled) return;
+        setClientId(null);
+        callbacksRef.current.onAvailable?.(false);
       });
     return () => {
       cancelled = true;

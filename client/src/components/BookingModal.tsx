@@ -68,6 +68,7 @@ export function BookingModal({
   const [comment, setComment] = useState('');
   const [consent, setConsent] = useState(false);
   const [googleProfile, setGoogleProfile] = useState<GoogleProfile | null>(null);
+  const [googleAvailable, setGoogleAvailable] = useState(false);
 
   const initialServiceRef = useRef(preselectServiceId);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -86,6 +87,7 @@ export function BookingModal({
     setComment('');
     setConsent(false);
     setGoogleProfile(null);
+    setGoogleAvailable(false);
     if (initialServiceRef.current) {
       setServiceId(initialServiceRef.current);
       setStep('datetime');
@@ -386,21 +388,27 @@ export function BookingModal({
                 <span className="booking-form__price">{selectedService.price.toLocaleString('ru-RU')} ₽</span>
               </div>
 
-              {!googleProfile ? (
+              {googleAvailable && !googleProfile && (
                 <>
                   <div className="booking-form__divider">
                     <span className="booking-form__divider-line" />
                     <span className="caps">Войти через Google</span>
                     <span className="booking-form__divider-line" />
                   </div>
-                  <GoogleSignIn onProfile={handleGoogleProfile} onError={setError} />
+                  <GoogleSignIn
+                    onProfile={handleGoogleProfile}
+                    onError={setError}
+                    onAvailable={setGoogleAvailable}
+                  />
                   <div className="booking-form__divider">
                     <span className="booking-form__divider-line" />
                     <span className="caps">Или заполнить вручную</span>
                     <span className="booking-form__divider-line" />
                   </div>
                 </>
-              ) : (
+              )}
+
+              {googleProfile && (
                 <div className="booking-google-ok">
                   {googleProfile.picture && (
                     <img
