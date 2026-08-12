@@ -1,0 +1,24 @@
+{
+  "name": "studio-seta",
+  "version": "1.0.0",
+  "private": true,
+  "description": "STUDIO SETA by Catherine — premium nail studio concept (frontend + booking backend with Google Calendar sync)",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c yellow,cyan \"npm run dev -w server\" \"npm run dev -w client\"",
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "build": "npm run build -w client && npm run typecheck -w server",
+    "typecheck": "npm run typecheck -w client && npm run typecheck -w server",
+    "start": "npm run start -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

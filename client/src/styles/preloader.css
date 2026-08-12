@@ -1,0 +1,166 @@
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--graphite-950);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.8s;
+  pointer-events: all;
+}
+
+.preloader--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.preloader__container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-6);
+  position: relative;
+}
+
+/* Hand SVG styling */
+.preloader__svg {
+  width: 180px;
+  height: 240px;
+  color: var(--text-low);
+  overflow: visible;
+}
+
+.preloader__hand-path {
+  fill: none;
+  stroke: rgba(207, 204, 196, 0.45);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw-hand 2.2s forwards cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.preloader__nail {
+  fill: none;
+  stroke: var(--gold-soft);
+  stroke-width: 1.2;
+  opacity: 0;
+  animation: fade-in-nails 0.8s 1.5s forwards;
+}
+
+/* Falling drop */
+.preloader__drop {
+  fill: var(--gold);
+  opacity: 0;
+  transform-origin: 96px 34px;
+  animation: fall-drop 1.4s 1.6s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
+}
+
+/* Ripple effect */
+.preloader__ripple-container {
+  position: absolute;
+  top: 34px; /* offset corresponding to middle nail tip in the container */
+  left: 96px;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.preloader__ripple {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(0);
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  opacity: 0;
+  animation: ripple-out 1.5s 2.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.preloader__brand {
+  font-family: var(--serif);
+  font-size: 28px;
+  letter-spacing: 0.25em;
+  color: var(--text-hi);
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fade-in-up 1.2s 2.6s forwards cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+}
+
+.preloader__brand em {
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+.preloader__subtitle {
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: var(--sp-2);
+  opacity: 0;
+  animation: fade-in-up 1.2s 2.9s forwards cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Keyframe animations */
+@keyframes draw-hand {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-in-nails {
+  to {
+    opacity: 0.9;
+  }
+}
+
+@keyframes fall-drop {
+  0% {
+    transform: translateY(-90px) scaleY(1.4);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    transform: translateY(0) scaleY(1.2) scaleX(0.95);
+    opacity: 1;
+  }
+  92% {
+    transform: translateY(2px) scaleX(1.5) scaleY(0.6);
+    opacity: 1;
+    fill: var(--gold-soft);
+  }
+  100% {
+    transform: translateY(2px) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes ripple-out {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(9);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,127 @@
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 1024px) {
+  .header__inner {
+    grid-template-columns: 1fr auto;
+  }
+  .header__nav {
+    display: none;
+  }
+  .header__burger {
+    display: inline-flex;
+  }
+  .services__grid {
+    grid-template-columns: 1fr;
+  }
+  .services__intro {
+    position: static;
+  }
+  .portfolio__masonry {
+    columns: 2;
+  }
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .review-card {
+    grid-template-columns: 1fr;
+  }
+  .contact-bar__panel {
+    grid-template-columns: 1fr;
+  }
+  .about__grid {
+    grid-template-columns: 1fr;
+  }
+  .booking-datetime {
+    grid-template-columns: 1fr;
+  }
+  .booking-datetime__days {
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+    padding-right: 0;
+    padding-bottom: var(--sp-4);
+    max-height: 220px;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --header-h: 66px;
+  }
+  .section {
+    padding-block: var(--sp-7);
+  }
+  .header__socials {
+    display: none;
+  }
+  .header__cta {
+    display: none;
+  }
+  .brand__sub {
+    display: none;
+  }
+  .hero__meta {
+    gap: var(--sp-4);
+    bottom: var(--sp-4);
+  }
+  .hero__scroll {
+    display: none;
+  }
+  .portfolio__masonry {
+    columns: 1;
+  }
+  .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .price-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "main price"
+      "note note";
+  }
+  .price-row__leader {
+    display: none;
+  }
+  .price-row__book {
+    grid-column: 2;
+  }
+  .footer__grid {
+    grid-template-columns: 1fr;
+    gap: var(--sp-6);
+  }
+  .cookie__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .booking-slot-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .modal__panel {
+    width: 100%;
+    max-height: 100svh;
+    border-radius: 0;
+    border: none;
+  }
+  .modal__live {
+    display: none;
+  }
+  .review-card__pair {
+    grid-template-columns: 1fr;
+  }
+  .booking-service {
+    grid-template-columns: 1fr auto;
+  }
+  .booking-service__arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 460px) {
+  .booking-slot-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hero__title {
+    font-size: 40px;
+  }
+}

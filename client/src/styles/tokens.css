@@ -1,0 +1,64 @@
+/* ============================================================
+   STUDIO SETA — Design Tokens
+   Aesthetic: minimalism + macro photography + Vogue editorial
+   ============================================================ */
+:root {
+  /* Graphite scale (deep, warm-free blacks) */
+  --graphite-950: #0b0b0c;
+  --graphite-900: #121212;
+  --graphite-850: #161618;
+  --graphite-800: #1a1a1c;
+  --graphite-700: #242427;
+  --graphite-600: #2e2e31;
+
+  /* Neutrals */
+  --bone: #f6f4f0;
+  --ivory: #fbfaf7;
+  --muted: #9a978f;
+  --muted-dark: #6f6c66;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+
+  /* Gold accent */
+  --gold: #d4af37;
+  --gold-soft: #e6c873;
+  --gold-pale: #f3e6bb;
+  --gold-ink: #8c6d1f;
+
+  /* Text */
+  --text-hi: #ffffff;
+  --text-mid: #cfccc4;
+  --text-low: #9a978f;
+  --text-ink: #1c1a16;
+
+  /* Typography */
+  --serif: "Didot", "Bodoni MT", "Bodoni 72", "Playfair Display", "Cormorant Garamond", "Times New Roman", serif;
+  --sans: "Manrope", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Spacing scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+  --sp-9: 96px;
+  --sp-10: 128px;
+
+  /* Layout */
+  --container: 1240px;
+  --container-narrow: 860px;
+  --radius: 4px;
+  --radius-lg: 10px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-s: 0.3s;
+  --dur-m: 0.6s;
+
+  /* Header */
+  --header-h: 76px;
+}

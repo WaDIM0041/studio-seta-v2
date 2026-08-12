@@ -1,0 +1,16 @@
+export const SITE = {
+  brand: 'STUDIO SETA',
+  by: 'by Catherine',
+  domain: 'studio-seta.ru',
+  city: 'Петропавловск-Камчатский',
+  address: 'Владивостокская улица, 1, Петропавловск-Камчатский, Камчатский край',
+  workHours: '10:00 – 20:00, ежедневно',
+  phone: '+7 (914) 993-99-02',
+  email: 'hello@studio-seta.ru',
+  telegram: '@catherinesetajones',
+  telegramUrl: 'https://t.me/catherinesetajones',
+  instagram: 'catherine_setajones',
+  instagramUrl: 'https://instagram.com/catherine_setajones',
+  vk: 'https://vk.com/catherinesetajones',
+  whatsapp: 'https://wa.me/79149939902',
+};

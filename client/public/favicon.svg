@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#121212"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="12.5" fill="none" stroke="#D4AF37" stroke-opacity="0.35" stroke-width="1"/>
+  <text x="32" y="43" font-family="Didot,'Playfair Display',Georgia,serif" font-size="34" font-style="italic" fill="#D4AF37" text-anchor="middle">S</text>
+</svg>
